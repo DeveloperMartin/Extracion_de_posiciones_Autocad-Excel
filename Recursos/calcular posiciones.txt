@@ -1,0 +1,73 @@
+Sub calcular_posiciones()
+
+Dim Celda As Range
+Dim Pos As String
+Dim Esp, Ancho, Largo As Double
+Dim acadApp As Object
+Dim acadDoc As Object
+Dim acadText As Object
+Dim ORIGEN_X, FIN_X, ORIGEN_Y, ALTURA_RENGLON As Double
+Dim a As Integer
+Dim InsertionPoint(0 To 2)  As Double
+
+Set DOC = AutoCAD.Application.ActiveDocument
+
+    ActiveWorkbook.RefreshAll
+
+    For GuardarValores = 2 To 12
+
+        If Range("A" & GuardarValores).Value = "Total general" Then
+
+                GuardarValores = 12
+
+        Else
+
+            If Range("A" & GuardarValores).Value <> "" And Range("A" & GuardarValores).Value <> "fin" Then
+
+                    Posicion = Range("C" & GuardarValores).Value
+                    Esp = Range("G" & GuardarValores).Value
+                    Cantidad = Range("F" & GuardarValores).Value      
+
+                    Set acadApp = GetObject(, "AutoCAD.Application")
+                    Set acadDoc = acadApp.ActiveDocument
+
+                    InsertionPoint(0) = Range("A" & GuardarValores).Value + 5
+                    InsertionPoint(1) = 50                    
+                    Set acadText = acadDoc.ModelSpace.AddText("POS_PEZ:" & Posicion, InsertionPoint, 2)
+                    InsertionPoint(0) = Range("A" & GuardarValores).Value + 2
+                    InsertionPoint(1) = 25   
+                    Set acadText = acadDoc.ModelSpace.AddText("SPE_PRO:" & Esp, InsertionPoint, 2)
+                    InsertionPoint(0) = Range("A" & GuardarValores).Value + 2
+                    InsertionPoint(1) = 2   
+                    Set acadText = acadDoc.ModelSpace.AddText("CANT:" & Cantidad, InsertionPoint, 2)
+
+                    DOC.PurgeAll
+
+                    ALTURA_RENGLON = Range("E" & GuardarValores).Value
+                    ORIGEN_Y = Range("D" & GuardarValores).Value
+                    ORIGEN_X = Range("A" & GuardarValores).Value
+                    FIN_X = Range("B" & GuardarValores).Value
+
+                    dibujar_rectangulo ALTURA_RENGLON, ORIGEN_X, FIN_X, ORIGEN_Y
+
+                    DOC.SendCommand ("Z E ")   
+
+            End If
+
+        End If
+
+    Next
+
+End Sub
+
+Function dibujar_rectangulo(ALTURA_RENGLON, ORIGEN_X, FIN_X, ORIGEN_Y)
+Set DOC = AutoCAD.Application.ActiveDocument
+Dim POL As AcadPolyline
+Dim pnt(14) As Double
+pnt(0) = ORIGEN_X: pnt(1) = ORIGEN_Y: pnt(2) = 0
+pnt(3) = FIN_X: pnt(4) = pnt(1): pnt(5) = pnt(2)
+pnt(6) = pnt(3): pnt(7) = ORIGEN_Y + ALTURA_RENGLON: pnt(8) = pnt(2)
+pnt(9) = pnt(0): pnt(10) = pnt(7): pnt(11) = pnt(2)
+pnt(12) = pnt(0): pnt(13) = pnt(1): pnt(14) = pnt(2)
+Set POL = DOC.ModelSpace.AddPolyline(pnt)
+End Function
